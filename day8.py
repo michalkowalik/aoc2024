@@ -1,41 +1,49 @@
 #!/usr/bin/env python
 
 
-def solve_part_1(frequency_map: [list[str]]) -> int:
-    antennas = {}
-    antinodes = set()
+def pair_in_range(pair: (int, int), size: int) -> bool:
+    return 0 <= pair[0] < size and 0 <= pair[1] < size
 
-    # populate antinodes
-    for x in range(len(antinodes)):
-        for y in range(len(antinodes)):
+
+def solve_part_1(antennas: dict[str, list[tuple[int, int]]], map_size: int) -> int:
+    antinodes: set[tuple[int, int]] = set()
+
+    # find pairs of antennas of the same frequency
+    for antenna in antennas:
+        for a in range(len(antennas[antenna])-1):
+            for b in range(a+1, len(antennas[antenna])):
+                pair = (antennas[antenna][a], antennas[antenna][b])
+                # calculate the vector
+                dx = pair[1][0] - pair[0][0]
+                dy = pair[1][1] - pair[0][1]
+
+                antinodes.add((pair[0][0]-dx, pair[0][1]-dy))
+                antinodes.add((pair[1][0]+dx, pair[1][1]+dy))
+    return len([x for x in antinodes if pair_in_range(x, map_size)])
+
+
+def solve_part_2(antennas, map_size) -> int:
+    return 0
+
+
+def main():
+    frequency_map = []
+    antennas = {}
+    with open('input-day8.txt') as f:
+        for line in f:
+            frequency_map.append(list(line.strip()))
+
+    # sort antennas by frequency
+    for x in range(len(frequency_map)):
+        for y in range(len(frequency_map[0])):
             if frequency_map[x][y] not in ['.']:
                 if frequency_map[x][y] in antennas:
                     antennas[frequency_map[x][y]].append((x, y))
                 else:
                     antennas[frequency_map[x][y]] = [(x, y)]
 
-    print(antennas)
-
-    # find pairs of antennas
-    # calculate the vector
-    # expand vector
-    # mark antinode
-
-    return 0
-
-
-def main():
-    frequency_map = []
-    with open('day8-test.txt') as f:
-        for line in f:
-            frequency_map.append(list(line.strip()))
-
-    antinode_count = solve_part_1(frequency_map)
-    # show the map
-    for line in frequency_map:
-        print(''.join(line))
-
-    print(antinode_count)
+    print(f'Part1: {solve_part_1(antennas, len(frequency_map))}')
+    print(f'Part2: {solve_part_2(antennas, len(frequency_map))}')
 
 
 if __name__ == '__main__':
