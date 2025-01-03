@@ -55,7 +55,7 @@ def solve_part_2(antennas, map_size) -> int:
 def main():
     frequency_map = []
     antennas = {}
-    with open('input-day8.txt') as f:
+    with open('inputs/input-day8.txt') as f:
         for line in f:
             frequency_map.append(list(line.strip()))
 
