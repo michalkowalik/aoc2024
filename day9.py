@@ -30,16 +30,14 @@ def solve_part1(disk_map):
 
     b_cursor = len(disk_map)-1
     f_cursor = 0
-    while empty_blocks > 0:
+    while empty_blocks > 0 and f_cursor < b_cursor:
         if disk_map[f_cursor] is None:
             while disk_map[b_cursor] is None:
                 b_cursor -= 1
             disk_map[f_cursor] = disk_map[b_cursor]
             empty_blocks -= 1
-            f_cursor += 1
             b_cursor -= 1
-        else:
-            f_cursor += 1
+        f_cursor += 1
     print(f'checksum: {checksum(disk_map[:file_blocks])}')
 
 def solve_part2(disk_map):
@@ -47,7 +45,7 @@ def solve_part2(disk_map):
     print(f'checksum: {checksum(disk_map)}')
 
 def main():
-    with open('inputs/day9-test.txt') as f:
+    with open('inputs/day9.txt') as f:
         data = f.readline().strip()
     disk_map = build_disk_map(data)
 
