@@ -19,7 +19,7 @@ def is_solvable(result: int, operands: [int]) -> bool:
 
 def main():
     total_calibrations = 0
-    with open('day7-input.txt') as f:
+    with open('inputs/day7-input.txt') as f:
         for line in f:
             result, operands = line.strip().split(":")
             operands = [int(x) for x in operands.strip().split(" ")]

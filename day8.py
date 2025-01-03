@@ -23,7 +23,33 @@ def solve_part_1(antennas: dict[str, list[tuple[int, int]]], map_size: int) -> i
 
 
 def solve_part_2(antennas, map_size) -> int:
-    return 0
+    antinodes: set[tuple[int, int]] = set()
+
+    # add antennas to the antinodes:
+    for antenna in antennas:
+        if len(antennas[antenna]) > 1:
+            for position in antennas[antenna]:
+                antinodes.add(position)
+
+    for antenna in antennas:
+        for a in range(len(antennas[antenna])-1):
+            for b in range(a+1, len(antennas[antenna])):
+                pair = (antennas[antenna][a], antennas[antenna][b])
+                # calculate the vector
+                dx = pair[1][0] - pair[0][0]
+                dy = pair[1][1] - pair[0][1]
+
+                factor = 1
+                while pair_in_range((pair[0][0]-dx*factor, pair[0][1]-dy*factor), map_size):
+                    antinodes.add((pair[0][0]-dx*factor, pair[0][1]-dy*factor))
+                    factor += 1
+
+                factor = 1
+                while pair_in_range((pair[1][0]+dx*factor, pair[1][1]+dy*factor), map_size):
+                    antinodes.add((pair[1][0]+dx*factor, pair[1][1]+dy*factor))
+                    factor += 1
+
+    return len(antinodes)
 
 
 def main():
