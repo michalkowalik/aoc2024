@@ -1,2 +1,5 @@
 inputs/*
 venv/*
+**/.idea
+**/.gradle
+**/gradle
