@@ -13,6 +13,7 @@ def build_disk_map(data: str):
             disk_map.extend([None] * int(char))
     return disk_map
 
+
 def build_maps(disk_map):
     file_map = []
     empty_map = []
@@ -37,6 +38,7 @@ def build_maps(disk_map):
         file_map.append({'id': disk_map[start_cursor], 'start': start_cursor, 'len': (i-start_cursor)+1})
     return file_map, empty_map
 
+
 def calculate_checksum(disk_map):
     return sum([i*c for i, c in enumerate(disk_map) if c is not None])
 
@@ -59,20 +61,16 @@ def solve_part1(disk_map):
 
 
 def solve_part2(disk_map):
-
     file_map, empty_map = build_maps(disk_map)
-    current_file = 0
     moved_files = []
 
-    while True:
+    for file in reversed(file_map):
         # Nothing left to move
-        if len(file_map) < 2:
+        if file['id'] < 2:
             break
 
-        file = file_map[-1]
-        matching_empty_block = [x for x in empty_map if (x[1] - x[0]) >= file['len']]
+        matching_empty_block = [x for x in empty_map if (x[1] - x[0]) + 1 >= file['len'] and x[1] < file['start']]
         if matching_empty_block:
-            print(f'we can move file {file['id']} to the empty block {matching_empty_block[0]}')
             if file['id'] in moved_files:
                 continue
             # move file
@@ -81,57 +79,12 @@ def solve_part2(disk_map):
                 disk_map[file['start']+i] = None
             # re-create maps
             moved_files.append(file['id'])
-            file_map, empty_map = build_maps(disk_map)
-            # continue
-
-
-
-    # while 0 < file_end_cursor: # not sure if that is the correct condition!
-    #     empty_start_cursor = 0
-    #
-    #     file_end_cursor = file_start_cursor
-    #
-    #     while disk_map[file_end_cursor] is None:
-    #         file_end_cursor -= 1
-    #
-    #     # we've found a file. now let's check how big it is:
-    #     file_start_cursor = file_end_cursor
-    #     while disk_map[file_start_cursor] is not None and disk_map[file_end_cursor] == disk_map[file_start_cursor]:
-    #         file_start_cursor -= 1
-    #
-    #     # we've found the end of the file, let's report the lenght:
-    #     # print(f'file id {disk_map[file_end_cursor]}, length: {file_end_cursor - file_start_cursor}')
-    #     if disk_map[file_end_cursor] in moved_files:
-    #         file_end_cursor = file_start_cursor
-    #         continue
-    #
-    #     file_len = file_end_cursor - file_start_cursor
-    #
-    #     # now let's start looking for a space big enough to fit the file:
-    #     while empty_start_cursor < file_start_cursor:
-    #         while disk_map[empty_start_cursor] is not None:
-    #             empty_start_cursor += 1
-    #
-    #         # now we're on an empty space:
-    #         empty_end_cursor = empty_start_cursor
-    #         while disk_map[empty_end_cursor] is None:
-    #             empty_end_cursor += 1
-    #
-    #         if file_len <= empty_end_cursor - empty_start_cursor: # file fits:
-    #             for i in range(0, file_len):
-    #                 disk_map[empty_start_cursor + i] = disk_map[file_start_cursor + i + 1]
-    #                 disk_map[file_start_cursor + i + 1] = None
-    #             moved_files.append(disk_map[empty_start_cursor])
-    #             break # we've found and moved our file.
-    #
-    #         # the empty block is not big enough, we continue to search
-    #         empty_start_cursor = empty_end_cursor + 1
-
+            _, empty_map = build_maps(disk_map)
     print(f'checksum: {calculate_checksum(disk_map)}')
 
 
 def main():
-    with open('inputs/day9-test.txt') as f:
+    with open('inputs/day9.txt') as f:
         data = f.readline().strip()
     disk_map = build_disk_map(data)
 
