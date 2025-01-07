@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 public class Day10 {
 
     static class Point {
-        private int x;
-        private int y;
+        private final int x;
+        private final int y;
 
         public Point(int x, int y) {
             this.x = x;
@@ -38,7 +38,7 @@ public class Day10 {
         int i = 0;
 
         try {
-            reader = new BufferedReader(new FileReader("day10-test.txt"));
+            reader = new BufferedReader(new FileReader("day10.txt"));
             String line = reader.readLine();
             this.map = new int[line.length()][line.length()];
 
@@ -69,7 +69,6 @@ public class Day10 {
         return trailheads;
     }
 
-    // TODO: check upped bound of the array!
     private List<int[]> findNext(int[] position) {
         List<int[]> positions = List.of(
                 new int[]{position[0] - 1, position[1]},
@@ -79,15 +78,14 @@ public class Day10 {
         );
 
         return positions.stream()
-                .filter(x -> x[0] >=0
-                        && x[1] >= 0
+                .filter(x -> x[0] >=0 && x[0] < this.map.length
+                        && x[1] >= 0 && x[1] < this.map.length
                         && this.map[x[0]][x[1]] == this.map[position[0]][position[1]] + 1)
                 .collect(Collectors.toList());
 
     }
 
-    // here starts the
-    private void findPaths(int[] trailhead, Set<Point> nines) {
+    private void findPaths(int[] trailhead, Collection<Point> nines) {
         if (this.map[trailhead[0]][trailhead[1]] == 9) {
             nines.add(new Point(trailhead[0], trailhead[1]));
         }
@@ -105,22 +103,34 @@ public class Day10 {
         return nines.size();
     }
 
-    public void solvePartOne() {
-        // find zeros:
-        var trailHeads = findTrailheads();
-
-        // find paths for each trailHead:
-        // trailHeads.stream().forEach(this::findPaths);
-        // here starts the recursive magic
-        System.out.println("Trailhead has score of " + trailHeadScore(trailHeads.getFirst()) );
-
+    public int totalTrailHeadScore(int[] trailhead) {
+        List<Point> nines = new ArrayList<>();
+        findPaths(trailhead, nines);
+        return nines.size();
     }
 
+
+    public void solvePartOne() {
+        int trailheadsSum = findTrailheads().stream().
+                map(this::trailHeadScore).
+                reduce(0, Integer::sum);
+        System.out.println("Part One: Trailheads has score of " + trailheadsSum );
+    }
+
+
+    public void solvePartTwo() {
+        int trailheadsSum = findTrailheads().stream().
+                map(this::totalTrailHeadScore).
+                reduce(0, Integer::sum);
+        System.out.println("Part Two: Total Trailhead score  of " + trailheadsSum );
+
+    }
 
     public static void main(String[] args) {
         var day10 = new Day10();
 
         day10.readInput();
         day10.solvePartOne();
+        day10.solvePartTwo();
     }
 }
