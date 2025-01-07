@@ -88,6 +88,7 @@ public class Day10 {
     private void findPaths(int[] trailhead, Collection<Point> nines) {
         if (this.map[trailhead[0]][trailhead[1]] == 9) {
             nines.add(new Point(trailhead[0], trailhead[1]));
+            return;
         }
 
         var nextSteps = findNext(trailhead);
