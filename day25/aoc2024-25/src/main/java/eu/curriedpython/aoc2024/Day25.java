@@ -41,9 +41,6 @@ public class Day25 {
                     diagram = new char[7][5];
                 }
                 diagram[lineInDiagram++] = line.toCharArray();
-
-
-                System.out.println(line);
                 line = reader.readLine();
             }
             reader.close();
