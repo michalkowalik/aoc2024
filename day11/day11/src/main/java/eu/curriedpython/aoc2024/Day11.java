@@ -23,6 +23,7 @@ public class Day11 {
         }
     }
 
+    // brute force approach. won't work for 75 steps
     public void solvePartOne() {
         int blinksPartOne = 25;
         for (int blink = 0; blink < blinksPartOne; blink++) {
@@ -34,6 +35,21 @@ public class Day11 {
         System.out.println("Day11, Part One: " + inputStones.size() + " stones");
     }
 
+    private Map<Long, Long> step(Map<Long, Long> stones) {
+        Map<Long, Long> transformed = new IdentityHashMap<>();
+
+        stones.forEach((k, v) -> {
+            applyRule(k).forEach(s -> {
+                if (transformed.containsKey(s)) {
+                    transformed.replace(s, transformed.get(s) + v);
+                } else {
+                    transformed.put(s, v);
+                }
+            });
+        });
+        return transformed;
+    }
+
     // we can't do the brute force as for the first part - this is getting too expensive
     // the order of the stones doesn't matter really. they don't interact.
     // so as well we can have a map, where the key is the number engraved on a stone,
@@ -41,10 +57,12 @@ public class Day11 {
     // this way, we can apply the rule only once and update the count of the newly created stones.
     public void solvePartTwo() {
         Map<Long, Long> stones = new IdentityHashMap<>();
-        inputStones.forEach(stone -> stones.put(stone, 1L));
+        Map<Long, Long> finalStones = stones;
+        inputStones.forEach(stone -> finalStones.put(stone, 1L));
+
 
         for (int blink = 0; blink < 75; blink++) {
-            // nothing yet
+            stones = step(stones);
         }
 
         // count stones
