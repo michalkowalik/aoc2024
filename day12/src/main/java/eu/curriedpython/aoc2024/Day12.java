@@ -53,10 +53,10 @@ public class Day12 {
         Stack<PlotPoint> stack = new Stack<>();
         List<PlotPoint> plotsInRegion = new ArrayList<>();
 
-        // we're finding regions starting from the top, left.
-        // therefore theres' no need to check what's up, left from the starting point
-        // go right -> down.
-        // that way, each plot has only 2 neighbours that needs to be checked
+        // we're searching regions starting from the top-left.
+        // therefore there's no need to check what's up/left from the starting point
+        // Go right -> down.
+        // that way, each plot has only 2 neighbours that need to be checked
         var startPlot = new PlotPoint(row, column, garden[row][column].plant());
         stack.push(startPlot);
         plotsInRegion.add(startPlot);
