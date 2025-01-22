@@ -4,14 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("ALL")
 public class Day12 {
-
-
-    // we have to think a second how do we want to present the regions.
-    // PLOT: should have x,y, plant name
-    // and should be able to be "colored" as already visited
 
     // the input data should be read to a 2d array
     // the regions can be represented in an <Integer, List<Point>> map
@@ -27,7 +24,7 @@ public class Day12 {
         BufferedReader reader;
         int row = 0;
         try {
-            reader = new BufferedReader(new FileReader("day12-input-test-1.txt"));
+            reader = new BufferedReader(new FileReader("day12-input.txt"));
             String line = reader.readLine().strip();
             garden = new Plot[line.length()][line.length()];
 
@@ -48,15 +45,24 @@ public class Day12 {
                 new Plot(garden[row][column].plant(), true);
     }
 
+    private List<PlotPoint> findNeighbours(int row, int column) {
+        var n = List.of(
+                new PlotPoint(row - 1, column, 'x'),
+                new PlotPoint(row + 1, column, 'x'),
+                new PlotPoint(row, column - 1, 'x'),
+                new PlotPoint(row, column + 1, 'x'));
+
+        return n.stream().filter(p -> p.column() >= 0 && p.column() < garden.length &&
+                        p.row() >= 0 && p.row() < garden[row].length)
+                .map(e -> new PlotPoint(e.row(), e.column(), garden[e.row()][e.column()].plant()))
+                .toList();
+    }
+
     // find region startin at point (row, column)
     private List<PlotPoint> findRegion(int row, int column) {
         Stack<PlotPoint> stack = new Stack<>();
         List<PlotPoint> plotsInRegion = new ArrayList<>();
 
-        // we're searching regions starting from the top-left.
-        // therefore there's no need to check what's up/left from the starting point
-        // Go right -> down.
-        // that way, each plot has only 2 neighbours that need to be checked
         var startPlot = new PlotPoint(row, column, garden[row][column].plant());
         stack.push(startPlot);
         plotsInRegion.add(startPlot);
@@ -65,26 +71,33 @@ public class Day12 {
         while (!stack.isEmpty()) {
             var plot = stack.pop();
 
-            // check right
-            if ((plot.column() + 1) < garden.length &&
-                    garden[plot.row()][plot.column() + 1].plant() == plot.plant() &&
-                    !garden[plot.row()][plot.column() + 1].visited()) {
-                var pp = new PlotPoint(plot.row(), plot.column() + 1, plot.plant());
-                stack.push(pp);
-                plotsInRegion.add(pp);
-                setAsVisited(plot.row(), plot.column() + 1);
-            }
-            // check down
-            if ((plot.row() + 1) < garden.length &&
-                    garden[plot.row() + 1][plot.column()].plant() == plot.plant() &&
-                    !garden[plot.row() + 1][plot.column()].visited()) {
-                var pp = new PlotPoint(plot.row() + 1, plot.column(), plot.plant());
-                stack.push(pp);
-                plotsInRegion.add(pp);
-                setAsVisited(plot.row() + 1, plot.column());
-            }
+            findNeighbours(plot.row(), plot.column()).stream()
+                    .filter(p -> garden[p.row()][p.column()].plant() == plot.plant() &&
+                            !garden[p.row()][p.column()].visited()).forEach(pp -> {
+                        stack.push(pp);
+                        plotsInRegion.add(pp);
+                        setAsVisited(pp.row(), pp.column());
+                    });
         }
         return plotsInRegion;
+    }
+
+    // returns number of neighbouring plots with different plants
+    // and on the border
+    private int calculateFence(PlotPoint point) {
+        var n = List.of(
+                new PlotPoint(point.row() - 1, point.column(), 'x'),
+                new PlotPoint(point.row() + 1, point.column(), 'x'),
+                new PlotPoint(point.row(), point.column() - 1, 'x'),
+                new PlotPoint(point.row(), point.column() + 1, 'x'));
+
+        int size = n.stream().filter(p -> (p.row() >= 0 && p.row() < garden.length &&
+                        p.column() >= 0 && p.column() < garden.length &&
+                        garden[p.row()][p.column()].plant() != point.plant()) ||
+                        (p.row() < 0 || p.column() < 0 ||
+                                p.row() >= garden.length || p.column() >= garden.length))
+                .toList().size();
+        return size;
     }
 
     public void partOne() {
@@ -95,14 +108,18 @@ public class Day12 {
                     continue;
                 }
                 // we haven't visited that particular plot yet.
-                // that means, we need to do the search and find all adjacent plots with the same plant growing on them
-                // and save them in a map
                 regions.put(regionId++, findRegion(row, col));
             }
         }
 
         // once we have defined the regions, we can calculate the cost of the fence for each region:
-        System.out.println("Day 12, part One: ");
+        AtomicLong fenceCost = new AtomicLong();
+        regions.forEach((k, v) -> {
+            var fenceSize = v.stream().map(plot -> calculateFence(plot)).mapToInt(Integer::intValue).sum();
+            fenceCost.addAndGet(fenceSize * v.size());
+        });
+
+        System.out.println("Day 12, part One: " + fenceCost);
     }
 
 
