@@ -5,16 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
-@SuppressWarnings("ALL")
 public class Day12 {
 
     // the input data should be read to a 2d array
     // the regions can be represented in an <Integer, List<Point>> map
 
     private Plot[][] garden;
-    private Map<Integer, List<PlotPoint>> regions;
+    private final Map<Integer, List<PlotPoint>> regions;
 
     public Day12(Map<Integer, List<PlotPoint>> regions) {
         this.regions = regions;
@@ -91,13 +89,12 @@ public class Day12 {
                 new PlotPoint(point.row(), point.column() - 1, 'x'),
                 new PlotPoint(point.row(), point.column() + 1, 'x'));
 
-        int size = n.stream().filter(p -> (p.row() >= 0 && p.row() < garden.length &&
+        return n.stream().filter(p -> (p.row() >= 0 && p.row() < garden.length &&
                         p.column() >= 0 && p.column() < garden.length &&
                         garden[p.row()][p.column()].plant() != point.plant()) ||
                         (p.row() < 0 || p.column() < 0 ||
                                 p.row() >= garden.length || p.column() >= garden.length))
                 .toList().size();
-        return size;
     }
 
     public void partOne() {
@@ -115,8 +112,8 @@ public class Day12 {
         // once we have defined the regions, we can calculate the cost of the fence for each region:
         AtomicLong fenceCost = new AtomicLong();
         regions.forEach((k, v) -> {
-            var fenceSize = v.stream().map(plot -> calculateFence(plot)).mapToInt(Integer::intValue).sum();
-            fenceCost.addAndGet(fenceSize * v.size());
+            var fenceSize = v.stream().map(this::calculateFence).mapToInt(Integer::intValue).sum();
+            fenceCost.addAndGet((long) fenceSize * v.size());
         });
 
         System.out.println("Day 12, part One: " + fenceCost);
