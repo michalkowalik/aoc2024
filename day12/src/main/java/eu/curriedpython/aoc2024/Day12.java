@@ -10,13 +10,8 @@ public class Day12 {
 
     // the input data should be read to a 2d array
     // the regions can be represented in an <Integer, List<Point>> map
-
     private Plot[][] garden;
-    private final Map<Integer, List<PlotPoint>> regions;
 
-    public Day12(Map<Integer, List<PlotPoint>> regions) {
-        this.regions = regions;
-    }
 
     private void readInput() {
         BufferedReader reader;
@@ -97,7 +92,21 @@ public class Day12 {
                 .toList().size();
     }
 
-    public void partOne() {
+    public void partOne(Map<Integer, List<PlotPoint>> regions) {
+        AtomicLong fenceCost = new AtomicLong();
+        regions.forEach((k, v) -> {
+            var fenceSize = v.stream().map(this::calculateFence).mapToInt(Integer::intValue).sum();
+            fenceCost.addAndGet((long) fenceSize * v.size());
+        });
+        System.out.println("Day 12, part One: " + fenceCost);
+    }
+
+    public void partTwo(Map<Integer, List<PlotPoint>> regions) {
+        System.out.println("Day 12, part Two: ");
+    }
+
+    private Map<Integer, List<PlotPoint>> getRegions() {
+        Map<Integer, List<PlotPoint>> regions = new IdentityHashMap<>();
         int regionId = 0;
         for (int row = 0; row < garden.length; row++) {
             for (int col = 0; col < garden.length; col++) {
@@ -108,21 +117,14 @@ public class Day12 {
                 regions.put(regionId++, findRegion(row, col));
             }
         }
-
-        // once we have defined the regions, we can calculate the cost of the fence for each region:
-        AtomicLong fenceCost = new AtomicLong();
-        regions.forEach((k, v) -> {
-            var fenceSize = v.stream().map(this::calculateFence).mapToInt(Integer::intValue).sum();
-            fenceCost.addAndGet((long) fenceSize * v.size());
-        });
-
-        System.out.println("Day 12, part One: " + fenceCost);
+        return regions;
     }
 
-
     public static void main(String[] args) {
-        Day12 day12 = new Day12(new IdentityHashMap<>());
+        Day12 day12 = new Day12();
         day12.readInput();
-        day12.partOne();
+        var regions = day12.getRegions();
+        day12.partOne(regions);
+        day12.partTwo(regions);
     }
 }
