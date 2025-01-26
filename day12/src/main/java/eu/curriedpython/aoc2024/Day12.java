@@ -51,7 +51,7 @@ public class Day12 {
                 .toList();
     }
 
-    // find region startin at point (row, column)
+    // find region starting at point (row, column)
     private List<PlotPoint> findRegion(int row, int column) {
         Stack<PlotPoint> stack = new Stack<>();
         List<PlotPoint> plotsInRegion = new ArrayList<>();
@@ -94,15 +94,72 @@ public class Day12 {
 
     public void partOne(Map<Integer, List<PlotPoint>> regions) {
         AtomicLong fenceCost = new AtomicLong();
-        regions.forEach((k, v) -> {
+        regions.forEach((_, v) -> {
             var fenceSize = v.stream().map(this::calculateFence).mapToInt(Integer::intValue).sum();
             fenceCost.addAndGet((long) fenceSize * v.size());
         });
         System.out.println("Day 12, part One: " + fenceCost);
     }
 
+
+    private boolean isOutsideGarden(PlotPoint p) {
+        return p.row() < 0 || p.row() >= garden.length || p.column() < 0 || p.column() >= garden.length;
+    }
+
+    private char gardenPlant(PlotPoint p) {
+        if (isOutsideGarden(p)) {
+            return 'x';
+        }
+        return this.garden[p.row()][p.column()].plant();
+    }
+
+    /**
+     * we take the three L-shaped plots.
+     * 3x the same Plant -> check diagonal for the concave corner
+     * 2x the same Plant -> no corner
+     * 1x the same Plant -> corner
+     * outside the garden is to be treated as a different plant
+     * <p>
+     * rotate L four times to cover all corners.
+     * <p>
+     * it's an ugly code tbh
+     *
+     * @param plot plot
+     * @return count of corners
+     */
+    private int countCorners(PlotPoint plot) {
+
+        var els = List.of(
+                List.of(new PlotPoint(plot.row(), plot.column() - 1, 'x'), new PlotPoint(plot.row() - 1, plot.column(), 'x')),
+                List.of(new PlotPoint(plot.row(), plot.column() - 1, 'x'), new PlotPoint(plot.row() + 1, plot.column(), 'x')),
+                List.of(new PlotPoint(plot.row() + 1, plot.column(), 'x'), new PlotPoint(plot.row(), plot.column() + 1, 'x')),
+                List.of(new PlotPoint(plot.row() - 1, plot.column(), 'x'), new PlotPoint(plot.row(), plot.column() + 1, 'x')));
+
+        // now, let's filter that
+        return els.stream().map(p -> {
+            var x = p.stream().filter(pp -> isOutsideGarden(pp) || gardenPlant(pp) != plot.plant()).count();
+            return switch ((int) x) {
+                case 1 -> 0; // no corner
+                case 2 -> 1; // corner
+                default -> {  // can be only 2 (concave). TODO: finish
+                    var row = p.stream().filter(pp -> !Objects.equals(pp.row(), plot.row())).findFirst().orElseThrow();
+                    var col = p.stream().filter(pp -> !Objects.equals(pp.column(), plot.column())).findFirst().orElseThrow();
+                    yield garden[row.row()][col.column()].plant() == plot.plant() ? 0 : 1;
+                }
+            };
+        }).mapToInt(Integer::intValue).sum();
+
+    }
+
+
     public void partTwo(Map<Integer, List<PlotPoint>> regions) {
-        System.out.println("Day 12, part Two: ");
+        // let's find all the corners
+        AtomicLong fenceCost = new AtomicLong();
+        regions.forEach((k, v) -> {
+            var corners = v.stream().map(this::countCorners).mapToInt(Integer::intValue).sum();
+            fenceCost.addAndGet((long) corners * v.size());
+        });
+        System.out.println("Day 12, part Two: " + fenceCost);
     }
 
     private Map<Integer, List<PlotPoint>> getRegions() {
