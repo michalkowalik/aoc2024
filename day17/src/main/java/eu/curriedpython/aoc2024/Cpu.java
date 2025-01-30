@@ -1,21 +1,18 @@
 package eu.curriedpython.aoc2024;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
 public class Cpu {
-    List<Integer> output = new ArrayList<>();
-    private Integer regA;
-    private Integer regB;
-    private Integer regC;
+    @Getter List<Integer> output = new ArrayList<>();
+    @Getter private int regA;
+    @Getter private int regB;
+    @Getter private int regC;
     private int pc; // program counter
-    private List<Integer> program;
+    @Getter List<Integer> program;
 
     public Cpu(List<Integer> program, int regA, int regB, int regC) {
         this.program = program;
@@ -77,10 +74,7 @@ public class Cpu {
         };
     }
 
-    // division
     private int dv(int operand) {
-        double nom = (double) regA;
-        double denom = 1 << comboOperand(operand);
-        return (int) Math.floor(nom / denom);
+        return (int) Math.floor((double) regA / (1 << comboOperand(operand)));
     }
 }
