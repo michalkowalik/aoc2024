@@ -10,12 +10,10 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class Cpu {
+    List<Integer> output = new ArrayList<>();
     private Integer regA;
     private Integer regB;
     private Integer regC;
-
-    List<Integer> output = new ArrayList<>();
-
     private int pc; // program counter
     private List<Integer> program;
 
@@ -43,18 +41,29 @@ public class Cpu {
     }
 
     public void step() {
+        if (pc % 2 == 1) {
+            throw new IllegalArgumentException("Thou shalt not use odd addresses.");
+        }
         int opcode = fetch();
         int operand = fetch();
 
         switch (opcode & 7) {
-            case 0 -> adv(operand);
-            case 1 -> bxl(operand);
-            case 2 -> bst(operand);
-            case 3 -> jnz(operand);
-            case 4 -> bxc(operand);
-            case 5 -> out(operand);
-            case 6 -> bdv(operand);
-            case 7 -> cdv(operand);
+            case 0 -> // ADV
+                    regA = dv(operand);
+            case 1 -> // BLX
+                    regB = regB ^ (operand & 7);
+            case 2 -> // BST
+                    regB = comboOperand(operand) & 7;
+            case 3 -> // JNZ
+                    pc = (regA == 0) ? pc : operand;
+            case 4 -> // BXC
+                    regB = regB ^ regC;
+            case 5 -> // OUT
+                    output.add(comboOperand(operand) & 7);
+            case 6 -> //BDV
+                    regB = dv(operand);
+            case 7 -> // CDV
+                    regC = dv(operand);
         }
     }
 
@@ -68,46 +77,10 @@ public class Cpu {
         };
     }
 
-    // opcodes
-    private void adv(int operand) {
+    // division
+    private int dv(int operand) {
         double nom = (double) regA;
-        double denom = (double) (2 << (comboOperand(operand)-1));
-        regA = (int) Math.floor(nom / denom);
+        double denom = 1 << comboOperand(operand);
+        return (int) Math.floor(nom / denom);
     }
-
-    private void bxl(int operand) {
-        regB = regB ^ (operand & 7);
-    }
-
-    private void bst(int operand) {
-        regB = comboOperand(operand) & 7;
-    }
-
-    private void jnz(int operand) {
-        if (regA == 0) {
-            return;
-        }
-        pc = operand;
-    }
-
-    private void bxc(int operand) {
-        regB = regB ^ regC;
-    }
-
-    private void out(int operand) {
-        output.add(comboOperand(operand) & 7);
-    }
-
-    private void bdv(int operand) {
-        double nom = (double) regA;
-        double denom = (double) (2 << comboOperand(operand)-1);
-        regB = (int) Math.floor(nom / denom);
-    }
-
-    private void cdv(int operand) {
-        double nom = (double) regA;
-        double denom = (double) (2 << comboOperand(operand)-1);
-        regC = (int) Math.floor(nom / denom);
-    }
-
 }
