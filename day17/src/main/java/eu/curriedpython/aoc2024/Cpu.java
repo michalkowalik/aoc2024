@@ -1,18 +1,22 @@
 package eu.curriedpython.aoc2024;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Cpu {
     @Getter List<Integer> output = new ArrayList<>();
-    @Getter private int regA;
-    @Getter private int regB;
-    @Getter private int regC;
+    @Setter @Getter private int regA;
+    @Setter @Getter private int regB;
+    @Setter @Getter private int regC;
+    @Setter @Getter List<Integer> program;
     private int pc; // program counter
-    @Getter List<Integer> program;
+
+    public Cpu() {
+        // nothing to see here
+    }
 
     public Cpu(List<Integer> program, int regA, int regB, int regC) {
         this.program = program;
@@ -25,9 +29,6 @@ public class Cpu {
         while (pc < program.size()) {
             step();
         }
-        System.out.println(output.stream().
-                map(Object::toString).
-                collect(Collectors.joining(",")));
     }
 
     private int fetch() {
@@ -59,7 +60,7 @@ public class Cpu {
                     output.add(comboOperand(operand) & 7);
             case 6 -> //BDV
                     regB = dv(operand);
-            case 7 -> // CDV
+            default -> // CDV
                     regC = dv(operand);
         }
     }
