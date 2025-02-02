@@ -7,16 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cpu {
-    @Getter List<Integer> output = new ArrayList<>();
-    @Setter @Getter private int regA;
-    @Setter @Getter private int regB;
-    @Setter @Getter private int regC;
-    @Setter @Getter List<Integer> program;
+    @Getter
+    List<Integer> output = new ArrayList<>();
+    @Setter
+    @Getter
+    List<Integer> program;
+    @Setter
+    @Getter
+    private int regA;
+    @Setter
+    @Getter
+    private int regB;
+    @Setter
+    @Getter
+    private int regC;
     private int pc; // program counter
 
-    public Cpu() {
-        // nothing to see here
-    }
 
     public Cpu(List<Integer> program, int regA, int regB, int regC) {
         this.program = program;
@@ -47,8 +53,8 @@ public class Cpu {
 
         switch (opcode & 7) {
             case 0 -> // ADV
-                    regA = dv(operand);
-            case 1 -> // BLX
+                    regA = regA >> (comboOperand(operand) & 7);
+            case 1 -> // BXL
                     regB = regB ^ (operand & 7);
             case 2 -> // BST
                     regB = comboOperand(operand) & 7;
@@ -59,9 +65,9 @@ public class Cpu {
             case 5 -> // OUT
                     output.add(comboOperand(operand) & 7);
             case 6 -> //BDV
-                    regB = dv(operand);
+                    regB = regA >> (comboOperand(operand) & 7);
             default -> // CDV
-                    regC = dv(operand);
+                    regC = regA >> (comboOperand(operand) & 7);
         }
     }
 
@@ -73,9 +79,5 @@ public class Cpu {
             case 6 -> regC;
             default -> throw new IndexOutOfBoundsException();
         };
-    }
-
-    private int dv(int operand) {
-        return (int) Math.floor((double) regA / (1 << comboOperand(operand)));
     }
 }
