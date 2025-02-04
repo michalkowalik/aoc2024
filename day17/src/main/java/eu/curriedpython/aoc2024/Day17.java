@@ -1,5 +1,6 @@
 package eu.curriedpython.aoc2024;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,26 @@ public class Day17 {
      *   let's see how that works
      */
     private int findA(List<Integer> program) {
-        return 0;
+        Integer a = 0;
+        List<Integer> temp = new ArrayList<>();
+        Cpu cpu = new Cpu(program, 0, 0, 0);
+        for(int b : program.reversed()) {
+            temp.addFirst(b);
+            System.out.println("adding " + b);
+            for (int i = 0; i <= 7; i++) {
+                Integer tempA = (a << 3) | i;
+                cpu.reset();
+                cpu.setRegA(tempA);
+                cpu.run();
+                printOutput(cpu.getOutput());
+                if (cpu.getOutput().equals(temp)) {
+                    System.out.println("tempA: " + tempA);
+                    a = tempA;
+                    break;
+                }
+            }
+        }
+            return a;
     }
 
     private void part1() {
@@ -41,18 +61,14 @@ public class Day17 {
 
         Cpu cpu = new Cpu(program, regA, regB, regC);
         cpu.run();
+        System.out.print("Part 1: ");
         printOutput(cpu.getOutput());
 
     }
 
     private void part2() {
-        List<Integer> program = List.of(0,3,5,4,3,0);
-        Cpu cpu = new Cpu(program, 0, 0, 0);
-
-        cpu.setRegA(117440);
-        cpu.run();
-        printOutput(cpu.getOutput());
-
+        List<Integer> program = List.of(2,4,1,5,7,5,1,6,0,3,4,3,5,5,3,0); //List.of(0,3,5,4,3,0);
+        System.out.println("Part 2: A = " + findA(program));
     }
 
     public static void main(String[] args) {

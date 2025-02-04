@@ -37,6 +37,14 @@ public class Cpu {
         }
     }
 
+    public void reset() {
+        pc = 0;
+        regA = 0;
+        regB = 0;
+        regC = 0;
+        output.clear();
+    }
+
     private int fetch() {
         if (pc >= program.size()) {
             throw new IndexOutOfBoundsException();
