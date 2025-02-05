@@ -28,29 +28,37 @@ public class Day17 {
      *   we will work our way down by reversing the program & shifting A 3 bits to the right before
      *   appending next 3 bits.
      *
-     *   let's see how that works
+     *   we need to track _multiple_ partial values of A.
+     *   not all of them lead to a happy ending -> use recursion
      */
     private int findA(List<Integer> program) {
         Integer a = 0;
         List<Integer> temp = new ArrayList<>();
-        Cpu cpu = new Cpu(program, 0, 0, 0);
         for(int b : program.reversed()) {
             temp.addFirst(b);
             System.out.println("adding " + b);
+            var nextBits = findNextBits(program, a, temp);
+            System.out.println("next bits " + nextBits);
+
+        }
+            return a;
+    }
+
+
+    private List<Integer> findNextBits(List<Integer> program, Integer a, List<Integer> temp) {
+        var nextBits = new ArrayList<Integer>();
+        Cpu cpu = new Cpu(program, 0, 0, 0);
+
             for (int i = 0; i <= 7; i++) {
                 Integer tempA = (a << 3) | i;
-                cpu.reset();
                 cpu.setRegA(tempA);
                 cpu.run();
                 printOutput(cpu.getOutput());
                 if (cpu.getOutput().equals(temp)) {
-                    System.out.println("tempA: " + tempA);
-                    a = tempA;
-                    break;
+                    nextBits.add(tempA);
                 }
             }
-        }
-            return a;
+        return nextBits;
     }
 
     private void part1() {
