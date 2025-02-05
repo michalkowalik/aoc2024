@@ -6,10 +6,18 @@ import java.util.stream.Collectors;
 
 public class Day17 {
 
+    public static void main(String[] args) {
+        var day17 = new Day17();
+        day17.part1();
+        day17.part2();
+
+        System.out.println("Done.");
+    }
+
     private void printOutput(List<Integer> output) {
         System.out.println(output.stream().
-            map(Object::toString).
-            collect(Collectors.joining(",")));
+                map(Object::toString).
+                collect(Collectors.joining(",")));
 
     }
 
@@ -25,47 +33,45 @@ public class Day17 {
      *   3,0: JNZ 0  -> loop back if A != 0
      *
      *   As we need to know the 0..7 _older_ bits of A to calculate the output,
-     *   we will work our way down by reversing the program & shifting A 3 bits to the right before
+     *   we will work our way down by reversing the program & shifting RegA 3 bits to the right before
      *   appending next 3 bits.
      *
      *   we need to track _multiple_ partial values of A.
      *   not all of them lead to a happy ending -> use recursion
      */
-    private int findA(List<Integer> program) {
-        Integer a = 0;
-        List<Integer> temp = new ArrayList<>();
-        for(int b : program.reversed()) {
-            temp.addFirst(b);
-            System.out.println("adding " + b);
-            var nextBits = findNextBits(program, a, temp);
-            System.out.println("next bits " + nextBits);
-
+    private void findA(List<Integer> program, List<Integer> temp, long a, List<Long> candidates) {
+        List<Long> partAs = findNextBits(program, a, temp);
+        if (program.size() == temp.size()) {
+            candidates.addAll(partAs);
+            return;
         }
-            return a;
+
+        List<Integer> nextTemp = new ArrayList<>(temp);
+        nextTemp.addFirst(program.reversed().get(temp.size()));
+        partAs.forEach(nextA -> findA(program, nextTemp, nextA, candidates));
     }
 
+    private List<Long> findNextBits(List<Integer> program, long a, List<Integer> temp) {
+        var nextBits = new ArrayList<Long>();
+        Cpu cpu = new Cpu(program, 0L, 0L, 0L);
 
-    private List<Integer> findNextBits(List<Integer> program, Integer a, List<Integer> temp) {
-        var nextBits = new ArrayList<Integer>();
-        Cpu cpu = new Cpu(program, 0, 0, 0);
-
-            for (int i = 0; i <= 7; i++) {
-                Integer tempA = (a << 3) | i;
-                cpu.setRegA(tempA);
-                cpu.run();
-                printOutput(cpu.getOutput());
-                if (cpu.getOutput().equals(temp)) {
-                    nextBits.add(tempA);
-                }
+        for (int i = 0; i <= 7; i++) {
+            long tempA = (a << 3) | i;
+            cpu.reset();
+            cpu.setRegA(tempA);
+            cpu.run();
+            if (cpu.getOutput().equals(temp)) {
+                nextBits.add(tempA);
             }
+        }
         return nextBits;
     }
 
     private void part1() {
-        int regA = 34615120;
-        int regB = 0;
-        int regC = 0;
-        List<Integer> program = List.of(2,4,1,5,7,5,1,6,0,3,4,3,5,5,3,0);
+        long regA = 34615120;
+        long regB = 0;
+        long regC = 0;
+        List<Integer> program = List.of(2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 3, 5, 5, 3, 0);
 
         Cpu cpu = new Cpu(program, regA, regB, regC);
         cpu.run();
@@ -75,15 +81,15 @@ public class Day17 {
     }
 
     private void part2() {
-        List<Integer> program = List.of(2,4,1,5,7,5,1,6,0,3,4,3,5,5,3,0); //List.of(0,3,5,4,3,0);
-        System.out.println("Part 2: A = " + findA(program));
-    }
+        List<Integer> program = List.of(2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 3, 5, 5, 3, 0);
+        List<Long> candidates = new ArrayList<>();
 
-    public static void main(String[] args) {
-        var day17 = new Day17();
-        day17.part1();
-        day17.part2();
+        findA(program,
+                List.of(program.getLast()),
+                0,
+                candidates);
 
-        System.out.println("Done.");
+        var min = candidates.stream().min(Long::compareTo).orElseThrow();
+        System.out.println("Part 2: " + min);
     }
 }

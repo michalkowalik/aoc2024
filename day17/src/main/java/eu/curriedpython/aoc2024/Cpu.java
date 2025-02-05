@@ -14,17 +14,17 @@ public class Cpu {
     List<Integer> program;
     @Setter
     @Getter
-    private int regA;
+    private Long regA;
     @Setter
     @Getter
-    private int regB;
+    private Long regB;
     @Setter
     @Getter
-    private int regC;
+    private Long regC;
     private int pc; // program counter
 
 
-    public Cpu(List<Integer> program, int regA, int regB, int regC) {
+    public Cpu(List<Integer> program, Long regA, Long regB, Long regC) {
         this.program = program;
         this.regA = regA;
         this.regB = regB;
@@ -39,9 +39,9 @@ public class Cpu {
 
     public void reset() {
         pc = 0;
-        regA = 0;
-        regB = 0;
-        regC = 0;
+        regA = 0L;
+        regB = 0L;
+        regC = 0L;
         output.clear();
     }
 
@@ -71,7 +71,7 @@ public class Cpu {
             case 4 -> // BXC
                     regB = regB ^ regC;
             case 5 -> // OUT
-                    output.add(comboOperand(operand) & 7);
+                    output.add((int) (comboOperand(operand) & 7));
             case 6 -> //BDV
                     regB = regA >> (comboOperand(operand) & 7);
             default -> // CDV
@@ -79,9 +79,9 @@ public class Cpu {
         }
     }
 
-    private int comboOperand(int op) {
+    private Long comboOperand(int op) {
         return switch (op & 7) {
-            case 0, 1, 2, 3 -> op;
+            case 0, 1, 2, 3 -> (long) op;
             case 4 -> regA;
             case 5 -> regB;
             case 6 -> regC;
