@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group = 'eu.curriedpython.aoc2024'
@@ -18,4 +19,21 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+ext {
+    javaMainClass = 'eu.curriedpython.aoc2024.Day17'
+}
+
+application {
+	    mainClassName = javaMainClass
+}
+
+jar {
+    manifest {
+    	     attributes "Main-Class": javaMainClass
+    }
+    from {
+    	 configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
